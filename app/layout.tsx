@@ -1,31 +1,23 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+// app/layout.tsx
+import ClientLayout from "./ClientLayout";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "ひだまりルート",
-  description: "子供/女性向け不審者発生地点回避経路検索アプリ",
+  description: "子供/女性向けの安全な経路検索アプリ",
 };
 
+// サーバーサイドのレイアウトコンポーネント
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="ja">
       <body>
-        <div id="root-container">{children}</div>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

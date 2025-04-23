@@ -8,7 +8,7 @@ import type {
   LineString,
 } from "geojson";
 
-// 🔧 Valhallaリクエストオブジェクトを組み立て
+// Valhallaリクエストオブジェクトを組み立て
 const buildValhallaRequest = (data: {
   from: { lat: number; lon: number };
   to: { lat: number; lon: number };
@@ -41,26 +41,24 @@ const buildValhallaRequest = (data: {
   return valhallaReq;
 };
 
-// 🧭 Polyline を GeoJSON LineString に変換
+// 🔄 Polyline を GeoJSON LineString にデコード（ここが重要！）
 const decodePolylineToGeoJson = (encoded: string): LineString => {
-  const coordinates = polyline.decode(encoded).map(([lat, lon]) => [lon, lat]);
+  const coordinates = polyline
+    .decode(encoded, 6)
+    .map(([lat, lon]) => [lon, lat]); // precision = 6 に！
   return {
     type: "LineString",
     coordinates,
   };
 };
 
-// 🎯 POST APIエンドポイント
+// エンドポイント本体
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    console.log("🪵 1. 受け取ったリクエスト:", data);
 
     const valhallaBody = buildValhallaRequest(data);
     const valhallaUrl = `${process.env.VALHALLA_API_URL}/route`;
-
-    console.log("🪵 2. Valhalla URL:", valhallaUrl);
-    console.log("🪵 3. Valhalla Body:", JSON.stringify(valhallaBody, null, 2));
 
     const res = await fetch(valhallaUrl, {
       method: "POST",
@@ -68,16 +66,11 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(valhallaBody),
     });
 
-    const rawText = await res.text(); // ← JSON変換前にテキストでログ
-    console.log("🪵 4. Valhalla生レスポンス:", rawText);
-    console.log("🪵 5. Valhallaステータス:", res.status);
-
     if (!res.ok) {
-      throw new Error(`Valhalla responded with status ${res.status}`);
+      throw new Error(`Valhalla error: ${res.status}`);
     }
 
-    const json: ValhallaResponse = JSON.parse(rawText); // ← ここで型変換
-    console.log("🪵 6. Valhalla JSON パース結果:", json);
+    const json: ValhallaResponse = await res.json();
 
     const routes: RouteResult[] = json.trip.legs.map((leg) => ({
       geometry: decodePolylineToGeoJson(leg.shape),
@@ -94,10 +87,9 @@ export async function POST(req: NextRequest) {
         : undefined,
     }));
 
-    console.log("🪵 7. 加工したRouteResult[]:", routes);
     return NextResponse.json({ routes });
-  } catch (err: any) {
-    console.error("❌ Valhalla APIでエラー:", err.message || err);
+  } catch (err) {
+    console.error("Valhalla APIでエラー:", err);
     return NextResponse.json({ error: "ルート取得失敗" }, { status: 500 });
   }
 }

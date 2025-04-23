@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CssBaseline, Stack, ThemeProvider } from "@mui/material";
+import { Stack } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
-import Top from "../components/Top";
-import theme from "./theme";
-import Map from "../components/Map";
+import Top from "./components/Top";
+import Map from "./components/Map";
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
@@ -16,34 +15,31 @@ export default function Home() {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-
-      <AnimatePresence mode="wait">
-        <Stack
-          sx={{ bgcolor: "#FBEECD" }}
-          justifyContent={"center"}
-          alignItems="center"
-        >
-          {showSplash ? (
-            <Stack sx={{ width: "375px", Height: "auto" }}>
-              <Top key="splash" />
-            </Stack>
-          ) : (
-            <Stack
-              key="main"
-              component={motion.div} // メイン画面もアニメーション
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
-              sx={{ minHeight: "100vh", bgcolor: "primary.light", padding: 1 }}
-            >
-              <Map />
-            </Stack>
-          )}
-        </Stack>
-      </AnimatePresence>
-    </ThemeProvider>
+    <AnimatePresence mode="wait">
+      <Stack
+        sx={{ bgcolor: "#FBEECD" }}
+        justifyContent={"center"}
+        alignItems="center"
+      >
+        {showSplash ? (
+          <Stack sx={{ width: "375px", Height: "auto" }}>
+            <Top key="splash" />
+          </Stack>
+        ) : (
+          <Stack
+            key="main"
+            component={motion.div} // メイン画面もアニメーション
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            sx={{ minHeight: "100vh", bgcolor: "primary.light", padding: 1 }}
+            width={"100%"}
+          >
+            <Map />
+          </Stack>
+        )}
+      </Stack>
+    </AnimatePresence>
   );
 }
